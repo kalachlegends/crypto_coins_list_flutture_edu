@@ -2,21 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class CoinListTitle extends StatelessWidget {
-  const CoinListTitle({
-    super.key,
-    required this.theme,
-    required this.coinName,
-    required this.priceInUSD,
-  });
+  const CoinListTitle(
+      {super.key,
+      required this.theme,
+      required this.coinName,
+      required this.priceInUSD,
+      required this.imageUrl});
 
   final ThemeData theme;
   final String coinName;
   final double priceInUSD;
+  final String imageUrl;
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: SvgPicture.asset(
-        'assets/images/svg12.svg',
+      leading: Image.network(
+        imageUrl,
         height: 45,
         width: 45,
       ),

@@ -1,6 +1,9 @@
-import 'package:crypto_coins_list/repositories/crypto_coins/crypto_coins_repository.dart';
-import 'package:crypto_coins_list/repositories/crypto_coins/models/crypto_coin_model.dart';
+import 'package:crypto_coins_list/features/crypto_list/bloc/crypto_list_bloc.dart';
+import 'package:crypto_coins_list/repositories/crypto_coins/crypto_coins.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 import '../../../widgets/bottom_navigation.dart';
 import '../widgets/crypto_coin_title.dart';
@@ -14,42 +17,53 @@ class CryptoListScreen extends StatefulWidget {
 }
 
 class _CryptoListScreenState extends State<CryptoListScreen> {
-  // @override void initState() {
-  //   CryptoCoinsRepository()
-  //   super.initState();
-  // }
-  List<CryptoCoin>? _cryptoCoinsList;
+  @override
+  final _cryptoListBloc = CryptoListBloc(GetIt.I<AbstractCoinsRepository>());
+  void initState() {
+    _cryptoListBloc.add(LoadCryptoList());
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-            onPressed: () async {
-              _cryptoCoinsList = await CryptoCoinsRepository().getCoinsList();
-              setState(() {});
-            },
-            child: const Icon(Icons.dangerous)),
-        appBar: AppBar(
-          title: Text(
-            widget.title,
-            textAlign: TextAlign.center,
-          ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          widget.title,
+          textAlign: TextAlign.center,
         ),
-        bottomNavigationBar: BotttomNavigation(),
-        body: (_cryptoCoinsList == null)
-            ? SizedBox()
-            : ListView.separated(
-                itemCount: _cryptoCoinsList!.length,
+      ),
+      bottomNavigationBar: const BotttomNavigation(),
+      body: BlocBuilder<CryptoListBloc, CryptoListState>(
+        bloc: _cryptoListBloc,
+        builder: (context, state) {
+          if (state is CryptoListLoadingFailure) {
+            return const Center(
+                child: Column(
+              children: [Text('Something went wrong')],
+            ));
+          }
+          if (state is CryptoListLoadded) {
+            return ListView.separated(
+                itemCount: state.coinsList.length,
                 separatorBuilder: (context, index) => Divider(),
                 itemBuilder: (context, i) {
-                  final coin = _cryptoCoinsList![i];
+                  final coin = state.coinsList[i];
                   final coinName = coin.name;
                   return CoinListTitle(
                     theme: theme,
                     coinName: coinName,
+                    imageUrl: 'https://www.cryptocompare.com/${coin.imageUrl}',
                     priceInUSD: coin.priceInUSD,
                   );
-                }));
+                });
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
+    );
   }
 }

@@ -1,6 +1,6 @@
 class Novella {
   final String imgUrl;
   final String name;
-
-  const Novella({required this.imgUrl, required this.name});
+  final dynamic description;
+  const Novella({required this.imgUrl, required this.name, this.description});
 }

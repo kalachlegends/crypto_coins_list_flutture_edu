@@ -11,8 +11,12 @@ class NovellaRepository {
         .get('https://api.novella-designer.com/api/v1/public/novella_news');
     final data = responce.data as Map<String, dynamic>;
     final novellaList = data['novella']
-        .map((e) => Novella(
-            name: e['novella']['name'], imgUrl: e['novella']['img_url']))
+        .map(
+          (e) => Novella(
+              name: e['novella']['name'],
+              imgUrl: e['novella']['img_url'],
+              description: e['novella']['description']),
+        )
         .toList();
     print(novellaList);
     return novellaList;

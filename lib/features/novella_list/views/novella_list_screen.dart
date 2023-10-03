@@ -16,31 +16,85 @@ class _NovellaListScreenState extends State<NovellaListScreen> {
   @override
   @override
   void initState() {
-    Future.delayed(Duration.zero, () async {
-      novellaList = await NovellaRepository().getNovellaList();
-      setState(() {});
-      //here is the async code, you can execute any async code here
-    });
-
+    _loading();
     super.initState();
+  }
+
+  _loading() async {
+    novellaList = await NovellaRepository().getNovellaList();
+    setState(() {});
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
         bottomNavigationBar: BotttomNavigation(),
         body: (novellaList == null)
-            ? Text('Loading....')
+            ? const Center(child: CircularProgressIndicator())
             : ListView.builder(
                 itemCount: novellaList!.length,
                 itemBuilder: (context, i) {
                   final novella = novellaList![i];
-                  return Card(
-                      child: ListTile(
-                    leading: Image.network(novella.imgUrl),
-                    title: Text(novella.name),
-                  ));
+                  return Container(
+                      margin: const EdgeInsets.only(
+                          left: 20.0, right: 20.0, bottom: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2), // Shadow position
+                          ),
+                        ],
+                        border: Border.all(
+                          color: Color.fromARGB(255, 38, 39, 39),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(children: [
+                        Expanded(
+                          flex: 2,
+                          child: Align(
+                              alignment: Alignment.topLeft,
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      novella.name,
+                                      textAlign: TextAlign.left,
+                                      textDirection: TextDirection.rtl,
+                                      style: TextStyle(
+                                          fontSize: 20, color: Colors.black),
+                                    ),
+                                    novella.description != null
+                                        ? Text(
+                                            novella.description,
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.black),
+                                          )
+                                        : const Text('')
+                                  ],
+                                ),
+                              )),
+                        ),
+                        Expanded(
+                            flex: 1,
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Image.network(
+                                novella.imgUrl,
+                                height: 100,
+                                fit: BoxFit.fitWidth,
+                              ),
+                            )),
+                      ]));
                 }),
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text(
             widget.title,
             textAlign: TextAlign.center,

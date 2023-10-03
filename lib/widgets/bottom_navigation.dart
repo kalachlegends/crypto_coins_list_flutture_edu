@@ -8,11 +8,9 @@ class BotttomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-        items: [
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.abc), label: 'Crypto List'),
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.abc), label: 'Novella List')
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.abc), label: 'Crypto List'),
+          BottomNavigationBarItem(icon: Icon(Icons.abc), label: 'Novella List')
         ],
         onTap: (index) => {
               if (index == 0)
