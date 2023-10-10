@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:crypto_coins_list/features/crypto_list/bloc/crypto_list_bloc.dart';
 import 'package:crypto_coins_list/repositories/crypto_coins/crypto_coins.dart';
 
@@ -37,32 +39,54 @@ class _CryptoListScreenState extends State<CryptoListScreen> {
         ),
       ),
       bottomNavigationBar: const BotttomNavigation(),
-      body: BlocBuilder<CryptoListBloc, CryptoListState>(
-        bloc: _cryptoListBloc,
-        builder: (context, state) {
-          if (state is CryptoListLoadingFailure) {
-            return const Center(
-                child: Column(
-              children: [Text('Something went wrong')],
-            ));
-          }
-          if (state is CryptoListLoadded) {
-            return ListView.separated(
-                itemCount: state.coinsList.length,
-                separatorBuilder: (context, index) => Divider(),
-                itemBuilder: (context, i) {
-                  final coin = state.coinsList[i];
-                  final coinName = coin.name;
-                  return CoinListTitle(
-                    theme: theme,
-                    coinName: coinName,
-                    imageUrl: 'https://www.cryptocompare.com/${coin.imageUrl}',
-                    priceInUSD: coin.priceInUSD,
-                  );
-                });
-          }
-          return const Center(child: CircularProgressIndicator());
+      body: RefreshIndicator(
+        onRefresh: () async {
+          final completer = Completer();
+          _cryptoListBloc.add(LoadCryptoList(completer: completer));
+          return completer.future;
         },
+        child: BlocBuilder<CryptoListBloc, CryptoListState>(
+          bloc: _cryptoListBloc,
+          builder: (context, state) {
+            if (state is CryptoListLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is CryptoListLoadingFailure) {
+              return Center(
+                  child: Column(
+                children: [
+                  const Text('Something went wrong'),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  TextButton(
+                      onPressed: () {
+                        _cryptoListBloc.add(LoadCryptoList());
+                      },
+                      child: Text("Try Again"))
+                ],
+              ));
+            }
+
+            if (state is CryptoListLoadded) {
+              return ListView.separated(
+                  itemCount: state.coinsList.length,
+                  separatorBuilder: (context, index) => Divider(),
+                  itemBuilder: (context, i) {
+                    final coin = state.coinsList[i];
+                    final coinName = coin.name;
+                    return CoinListTitle(
+                      theme: theme,
+                      coinName: coinName,
+                      imageUrl:
+                          'https://www.cryptocompare.com/${coin.imageUrl}',
+                      priceInUSD: coin.priceInUSD,
+                    );
+                  });
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       ),
     );
   }
